@@ -1,9 +1,11 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Sistema de Estoque e Vendas</title>
     <style>
-        /* Reset básico */
         * {
             box-sizing: border-box;
             font-family: Arial, sans-serif;
@@ -44,7 +46,7 @@
         .conteudo {
             display: none;
             background-color: white;
-            border: 4px solid #007bff; /* Aumentando a espessura da borda */
+            border: 4px solid #007bff;
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
@@ -54,11 +56,6 @@
 
         .ativo {
             display: block;
-        }
-
-        /* Estilização dos botões internos */
-        button {
-            font-size: 14px;
         }
 
         table {
@@ -81,7 +78,7 @@
             padding: 8px;
         }
 
-        input[type="text"], input[type="number"] {
+        input[type="text"], input[type="number"], input[type="password"] {
             padding: 5px;
             border-radius: 4px;
             border: 1px solid #ccc;
@@ -109,7 +106,7 @@
 <div class="abas">
     <button onclick="mostrarAba('estoque')">📦 Estoque</button>
     <button onclick="mostrarAba('vendas')">💰 Vendas</button>
-	    <button onclick="mostrarAba('relatorio')">📊 Relatorios</button>
+    <button onclick="mostrarAba('relatorio')">📊 Relatórios</button>
 </div>
 
 <div id="estoque" class="conteudo ativo">
@@ -121,7 +118,34 @@
 </div>
 
 <div id="relatorio" class="conteudo">
-    <?php include 'relatorio.php'; ?>
+    <?php
+    if (!isset($_SESSION['relatorio_liberado'])) {
+        // Processar a senha se enviada
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['senha'])) {
+            if ($_POST['senha'] === '1234') {
+                $_SESSION['relatorio_liberado'] = true;
+                header("Location: index.php");
+                exit;
+            } else {
+                $erro = "❌ Senha incorreta!";
+            }
+        }
+        ?>
+        <h3>🔐 Digite a senha para acessar o relatório:</h3>
+        <form method="POST">
+            <input type="password" name="senha" placeholder="Senha" required>
+            <button class="btn" type="submit">Acessar</button>
+        </form>
+        <?php if (isset($erro)) echo "<p style='color:red;'>$erro</p>"; ?>
+        <?php
+    } else {
+        include 'relatorio_conteudo.php';
+        echo '
+        <form method="POST" action="logout_relatorio.php">
+            <input class="btn" type="submit" value="🚪 Sair do Relatório">
+        </form>';
+    }
+    ?>
 </div>
 
 <script>

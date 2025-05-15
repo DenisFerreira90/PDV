@@ -1,4 +1,18 @@
+<?php
+session_start();
+if (!isset($_SESSION['acesso_liberado'])) {
+    header("Location: login_relatorio.php");
+    exit;
+}
+?>
+
+<form method="POST" action="logout_relatorio.php">
+    <input type="submit" value="🚪 Sair do Relatório">
+</form>
+
 <?php include 'conecta.php'; ?>
+<!-- O resto do HTML e da lógica do relatório vem aqui -->
+
 <!DOCTYPE html>
 <html>
 <head>
