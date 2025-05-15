@@ -70,7 +70,6 @@
         .totais-container input {
             width: 100px;
         }
-        /* Produtos com imagem grid */
         #listaProdutos {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -101,7 +100,6 @@
             font-size: 14px;
             margin-bottom: 4px;
         }
-        /* Filtro */
         #filtros button {
             margin-right: 10px;
             padding: 6px 14px;
@@ -133,7 +131,6 @@
 <div id="listaProdutos"></div>
 
 <form method="POST" action="processa_venda.php" onsubmit="return prepararEnvio()">
-
     <table id="tabelaProdutos">
         <thead>
             <tr>
@@ -150,14 +147,11 @@
     <div class="resumo-venda">
         <div class="totais-container">
             <div><strong>Total:</strong> R$ <span id="total">0.00</span></div>
-
             <div>
                 <label for="pago"><strong>Valor pago:</strong></label>
                 <input type="number" id="pago" name="pago" step="0.01" required oninput="atualizarTroco()">
             </div>
-
             <div><strong>Troco:</strong> R$ <span id="troco">0.00</span></div>
-
             <div>
                 <label for="forma_pagamento"><strong>Forma de Pagamento:</strong></label>
                 <select id="forma_pagamento" name="forma_pagamento" required>
@@ -176,7 +170,6 @@
 </form>
 
 <script>
-// Dados dos produtos vindos do PHP
 let produtos = <?php
     $res = $conn->query("SELECT * FROM produtos");
     $lista = [];
@@ -189,7 +182,6 @@ let produtos = <?php
 const listaProdutosDiv = document.getElementById('listaProdutos');
 const filtros = document.getElementById('filtros');
 const produtosBody = document.getElementById('produtosBody');
-
 let filtroAtual = '';
 
 function renderizarProdutos() {
@@ -212,20 +204,22 @@ function renderizarProdutos() {
             <div><small>Tecla: ${i+1}</small></div>
         `;
 
-        // Clicar adiciona produto no carrinho
-        div.onclick = () => {
-            adicionarProdutoCarrinho(p.id);
-        }
-
+        div.onclick = () => adicionarProdutoCarrinho(p.id);
         listaProdutosDiv.appendChild(div);
     });
 }
-
+filtros.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+        filtros.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filtroAtual = btn.getAttribute('data-tipo');
+        renderizarProdutos();
+    };
+});
 function adicionarProdutoCarrinho(id) {
     const produto = produtos.find(p => p.id == id);
     if (!produto) return;
 
-    // Verificar se já existe no carrinho
     for (let row of produtosBody.rows) {
         let select = row.cells[0].querySelector('select');
         if (select.value == id) {
@@ -242,10 +236,7 @@ function adicionarProdutoCarrinho(id) {
         }
     }
 
-    // Caso não exista, adiciona nova linha e seleciona o produto
     const tr = document.createElement('tr');
-
-    // Produto (select)
     const tdProduto = document.createElement('td');
     const select = document.createElement('select');
     select.innerHTML = '<option value="">-- Selecione --</option>';
@@ -255,11 +246,9 @@ function adicionarProdutoCarrinho(id) {
     select.value = produto.id;
     tdProduto.appendChild(select);
 
-    // Preço
     const tdPreco = document.createElement('td');
     tdPreco.innerText = parseFloat(produto.preco).toFixed(2);
 
-    // Quantidade
     const tdQtd = document.createElement('td');
     const inputQtd = document.createElement('input');
     inputQtd.type = 'number';
@@ -268,11 +257,9 @@ function adicionarProdutoCarrinho(id) {
     inputQtd.value = 1;
     tdQtd.appendChild(inputQtd);
 
-    // Subtotal
     const tdSubtotal = document.createElement('td');
     tdSubtotal.innerText = parseFloat(produto.preco).toFixed(2);
 
-    // Ação
     const tdAcao = document.createElement('td');
     const btnRemover = document.createElement('button');
     btnRemover.type = 'button';
@@ -286,12 +273,10 @@ function adicionarProdutoCarrinho(id) {
     tr.append(tdProduto, tdPreco, tdQtd, tdSubtotal, tdAcao);
     produtosBody.appendChild(tr);
 
-    // Eventos
     select.onchange = () => {
         const preco = parseFloat(select.selectedOptions[0].dataset.preco || 0);
         const estoque = parseInt(select.selectedOptions[0].dataset.estoque || 1);
         tdPreco.innerText = preco.toFixed(2);
-        inputQtd.disabled = false;
         inputQtd.max = estoque;
         inputQtd.value = 1;
         tdSubtotal.innerText = preco.toFixed(2);
@@ -321,14 +306,12 @@ function calcularTotais() {
     document.getElementById('total').innerText = total.toFixed(2);
     atualizarTroco();
 }
-
 function atualizarTroco() {
     const total = parseFloat(document.getElementById('total').innerText);
     const pago = parseFloat(document.getElementById('pago').value || 0);
     const troco = pago - total;
     document.getElementById('troco').innerText = troco.toFixed(2);
 }
-
 function prepararEnvio() {
     let itens = [];
     for (let row of produtosBody.rows) {
@@ -347,38 +330,21 @@ function prepararEnvio() {
         alert('Adicione ao menos um produto para vender.');
         return false;
     }
-
     document.getElementById('itens_json').value = JSON.stringify(itens);
     return true;
 }
 
-// Filtrar produtos por tipo
-filtros.querySelectorAll('button').forEach(btn => {
-    btn.onclick = () => {
-        filtros.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        filtroAtual = btn.getAttribute('data-tipo');
-        renderizarProdutos();
-    };
-});
-
-// Atalho teclado 1-9 para adicionar produto direto (da lista filtrada)
+// Teclas 1-9 para atalhos
 document.addEventListener('keydown', e => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return; // evita em inputs
-    const key = e.key;
-    if (/^[1-9]$/.test(key)) {
-        let index = parseInt(key) - 1;
-        let filtrados = filtroAtual ? produtos.filter(p => p.tipo === filtroAtual) : produtos;
-        if (index < filtrados.length) {
-            adicionarProdutoCarrinho(filtrados[index].id);
-        }
+    const n = parseInt(e.key);
+    if (!isNaN(n) && n >= 1 && n <= 9) {
+        const filtrados = filtroAtual ? produtos.filter(p => p.tipo === filtroAtual) : produtos;
+        const prod = filtrados[n - 1];
+        if (prod) adicionarProdutoCarrinho(prod.id);
     }
 });
 
-// Inicializa com todos produtos
 renderizarProdutos();
-
 </script>
-
 </body>
 </html>
