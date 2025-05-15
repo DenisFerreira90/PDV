@@ -12,28 +12,29 @@
     <label>Estoque:</label>
     <input type="number" name="estoque" required style="width: 80px;">
 
-    <label>Tipo:</label>
-    <select name="tipo" id="tipo" required onchange="atualizarLitragem()">
-        <option value="">Selecione</option>
-        <option value="Cerveja">Cerveja</option>
-        <option value="Refrigerante">Refrigerante</option>
-    </select>
+    <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px; margin-bottom: 10px;">
+        <div>
+            <label for="tipo">Tipo:</label><br>
+            <select name="tipo" id="tipo" required onchange="atualizarLitragem()" style="padding: 5px; width: 150px;">
+                <option value="">Selecione</option>
+                <option value="Cerveja">Cerveja</option>
+                <option value="Refrigerante">Refrigerante</option>
+            </select>
+        </div>
 
-<label>Litragem:</label>
-<select name="litragem" id="litragem" required>
-    <option value="">Selecione o tipo primeiro</option>
-</select>
-
-
-    <label>Litragem:</label>
-    <input type="text" name="litragem" placeholder="Ex: 600ml, 2L" required style="width: 100px;">
+        <div>
+            <label for="litragem">Litragem:</label><br>
+            <select name="litragem" id="litragem" required style="padding: 5px; width: 150px;">
+                <option value="">Selecione o tipo primeiro</option>
+            </select>
+        </div>
+    </div>
 
     <label>Imagem do produto:</label>
     <input type="file" name="imagem" required>
 
     <button type="submit" class="btn">Cadastrar</button>
 </form>
-
 
 <?php
 // Inserção de novo produto
@@ -54,8 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['nome'])) {
                   VALUES ('$nome', $preco, $estoque, '$tipo', '$litragem', '$caminho_imagem')");
     echo "<p style='color:green;'>✅ Produto cadastrado com sucesso!</p>";
 }
-
-
 
 // Atualização de estoque
 if (isset($_GET['id']) && isset($_GET['novo_estoque'])) {
@@ -124,11 +123,11 @@ function atualizarLitragem() {
     const litragem = document.getElementById("litragem");
 
     const opcoes = {
-        Cerveja: ["269 ml", "350 ml", "473 ml", "330 ml (Long Neck)", "600 ml", "1 litro"],
-        Refrigerante: ["269 ml", "350 ml", "500 ml", "1 litro", "1,5 litros", "2 litros", "2,5 litros", "3 litros"]
+        Cerveja: ["269 ml", "330 ml (Long Neck)", "350 ml", "473 ml", "600 ml", "1 litro"],
+        Refrigerante: ["200 ml", "237 ml", "250 ml", "290 ml", "350 ml", "500 ml", "600 ml", "1 litro", "1,5 litros", "2 litros", "2,25 litros", "3 litros"]
     };
 
-    litragem.innerHTML = ""; // Limpa as opções
+    litragem.innerHTML = "";
 
     if (opcoes[tipo]) {
         opcoes[tipo].forEach(valor => {
