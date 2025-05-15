@@ -12,11 +12,28 @@
     <label>Estoque:</label>
     <input type="number" name="estoque" required style="width: 80px;">
 
+    <label>Tipo:</label>
+    <select name="tipo" id="tipo" required onchange="atualizarLitragem()">
+        <option value="">Selecione</option>
+        <option value="Cerveja">Cerveja</option>
+        <option value="Refrigerante">Refrigerante</option>
+    </select>
+
+<label>Litragem:</label>
+<select name="litragem" id="litragem" required>
+    <option value="">Selecione o tipo primeiro</option>
+</select>
+
+
+    <label>Litragem:</label>
+    <input type="text" name="litragem" placeholder="Ex: 600ml, 2L" required style="width: 100px;">
+
     <label>Imagem do produto:</label>
-    <input type="file" name="imagem" required style="margin-bottom: 10px;">
+    <input type="file" name="imagem" required>
 
     <button type="submit" class="btn">Cadastrar</button>
 </form>
+
 
 <?php
 // Inserção de novo produto
@@ -24,9 +41,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['nome'])) {
     $nome = $_POST['nome'];
     $preco = $_POST['preco'];
     $estoque = $_POST['estoque'];
-    $conn->query("INSERT INTO produtos (nome, preco, estoque) VALUES ('$nome', $preco, $estoque)");
+    $tipo = $_POST['tipo'];
+    $litragem = $_POST['litragem'];
+
+    // Upload da imagem
+    $imagem_nome = $_FILES['imagem']['name'];
+    $imagem_tmp = $_FILES['imagem']['tmp_name'];
+    $caminho_imagem = "imagens/" . basename($imagem_nome);
+    move_uploaded_file($imagem_tmp, $caminho_imagem);
+
+    $conn->query("INSERT INTO produtos (nome, preco, estoque, tipo, litragem, imagem)
+                  VALUES ('$nome', $preco, $estoque, '$tipo', '$litragem', '$caminho_imagem')");
     echo "<p style='color:green;'>✅ Produto cadastrado com sucesso!</p>";
 }
+
+
 
 // Atualização de estoque
 if (isset($_GET['id']) && isset($_GET['novo_estoque'])) {
@@ -88,6 +117,31 @@ echo "</table>";
 function confirmarExclusao(id) {
     if (confirm("Tem certeza que deseja excluir este produto?")) {
         window.location.href = "?excluir_id=" + id;
+    }
+}
+function atualizarLitragem() {
+    const tipo = document.getElementById("tipo").value;
+    const litragem = document.getElementById("litragem");
+
+    const opcoes = {
+        Cerveja: ["269 ml", "350 ml", "473 ml", "330 ml (Long Neck)", "600 ml", "1 litro"],
+        Refrigerante: ["269 ml", "350 ml", "500 ml", "1 litro", "1,5 litros", "2 litros", "2,5 litros", "3 litros"]
+    };
+
+    litragem.innerHTML = ""; // Limpa as opções
+
+    if (opcoes[tipo]) {
+        opcoes[tipo].forEach(valor => {
+            const option = document.createElement("option");
+            option.value = valor;
+            option.text = valor;
+            litragem.appendChild(option);
+        });
+    } else {
+        const option = document.createElement("option");
+        option.value = "";
+        option.text = "Selecione o tipo primeiro";
+        litragem.appendChild(option);
     }
 }
 </script>
