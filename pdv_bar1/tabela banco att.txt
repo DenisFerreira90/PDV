@@ -1,0 +1,39 @@
+
+-- Criar o banco de dados
+CREATE DATABASE IF NOT EXISTS estoque_vendas;
+USE estoque_vendas;
+
+-- Criar tabela produtos
+CREATE TABLE IF NOT EXISTS produtos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    quantidade INT NOT NULL,
+    imagem VARCHAR(255),
+    tipo VARCHAR(50),
+    litragem VARCHAR(50),
+    ativo TINYINT(1) DEFAULT 1
+);
+
+-- Criar tabela vendas
+CREATE TABLE IF NOT EXISTS vendas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    produto_id INT,
+    quantidade INT,
+    valor_unitario DECIMAL(10,2),
+    valor_total DECIMAL(10,2),
+    valor_pago DECIMAL(10,2),
+    troco DECIMAL(10,2),
+    forma_pagamento VARCHAR(50),
+    data_venda DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+);
+
+-- Criar tabela log_exclusoes
+CREATE TABLE IF NOT EXISTS log_exclusoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    produto_id INT,
+    quantidade_excluida INT,
+    motivo VARCHAR(255),
+    data_exclusao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+);
